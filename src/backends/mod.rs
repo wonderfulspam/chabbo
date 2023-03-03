@@ -44,6 +44,13 @@ pub trait Database {
 }
 
 pub trait Backend: FileStorage + Database + Send + Sync + 'static {
+    fn get_initial_corpus(&self) -> Result<String>;
+}
+
+impl<T> Backend for T
+where
+    T: FileStorage + Database + Send + Sync + 'static,
+{
     fn get_initial_corpus(&self) -> Result<String> {
         match self.get_settings()?.active_corpus {
             CorpusType::Default => Ok(DEFAULT_MARKOV_CORPUS.to_string()),

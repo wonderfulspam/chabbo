@@ -1,4 +1,4 @@
-use super::{Backend, Database, FileStorage, Settings};
+use super::{Database, FileStorage, Settings};
 use anyhow::Result;
 use directories::ProjectDirs;
 use std::{
@@ -106,5 +106,3 @@ impl Database for LocalService {
         fs::write(path, json).map_err(anyhow::Error::from)
     }
 }
-
-impl Backend for LocalService {}

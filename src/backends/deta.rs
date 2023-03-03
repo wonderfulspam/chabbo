@@ -3,7 +3,7 @@ use deta_rs::{utils, Deta};
 use serde::Deserialize;
 use tracing::debug;
 
-use super::{Backend, Database, FileStorage, Settings};
+use super::{Database, FileStorage, Settings};
 
 const DRIVE_NAME: &str = "corpus";
 const BASE_NAME: &str = "settings";
@@ -71,8 +71,6 @@ impl Database for DetaService {
         Ok(())
     }
 }
-
-impl Backend for DetaService {}
 
 impl DetaService {
     pub fn new(deta_project_key: String) -> Self {
