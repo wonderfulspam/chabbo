@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chabbo</title>
+  </head>
+  <body>
+    <main class="container">
+      <h1>Chabbo, the chatbot from 1999</h1>
+      <div id="corpus-name"><p>Loading corpus name ...</p></div>
+      <form id="chabbo-form">
+        <input
+          type="text"
+          id="chabbo-input"
+          placeholder="Your input"
+          autofocus
+        />
+        <div class="grid">
+          <button type="submit" id="generate">Generate</button>
+          <button
+            type="submit"
+            id="change-corpus"
+            onclick="window.location.href='/corpus'"
+          >
+            Change corpus
+          </button>
+        </div>
+      </form>
+      <div id="response"></div>
+    </main>
+  </body>
+
+  <script>
+    async function postData(formInput) {
+      const response = await fetch("/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formInput),
+      });
+      return response.json();
+    }
+
+    async function get_active_corpus_name() {
+      const response = await fetch("/corpus/active", {
+        method: "GET",
+      });
+      return response.json();
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+      get_active_corpus_name().then(
+        (data) =>
+          (document.getElementById(
+            "corpus-name"
+          ).innerHTML = `<p>Active corpus: ${data.name}</p>`)
+      );
+    });
+
+    const loginForm = document.getElementById("chabbo-form");
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const inputElement = document.getElementById("chabbo-input");
+      const responseElement = document.getElementById("response");
+
+      postData({ input: inputElement.value }).then((result) => {
+        responseElement.innerHTML = "<p>" + result.response + "</p>";
+        inputElement.value = "";
+        inputElement.focus();
+      });
+    });
+  </script>
+</html>

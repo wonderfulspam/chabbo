@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chabbo - Corpus</title>
+    <style>
+      .icon {
+        height: 20px;
+        display: block;
+      }
+      .icon-true {
+        background-image: var(--icon-checkbox);
+      }
+      tbody tr:hover {
+        background: var(--secondary-hover);
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <h1>Available corpora</h1>
+      <div id="response"></div>
+      <div id="showData"></div>
+      <div class="grid">
+        <input
+          id="corpus-file"
+          style="display: none"
+          type="file"
+          onchange="uploadFile(this)"
+        />
+        <button
+          type="submit"
+          onclick="document.getElementById('corpus-file').click();"
+        >
+          Add new corpus
+        </button>
+        <button
+          type="submit"
+          id="change-corpus"
+          onclick="window.location.href='/'"
+        >
+          Back
+        </button>
+      </div>
+    </main>
+  </body>
+
+  <script>
+    async function list_corpora() {
+      const response = await fetch("/corpus/list", {
+        method: "GET",
+      });
+      return response.json();
+    }
+    async function set_corpus(corpus_name) {
+      const response = await fetch("/corpus", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ corpus: corpus_name }),
+      });
+      return response;
+    }
+
+    function refresh_corpora() {
+      list_corpora().then((data) => tableFromJson(data));
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      refresh_corpora();
+    });
+    document.querySelector("body").addEventListener(
+      "click",
+      function (evt) {
+        if (evt.target.tagName === "TD") {
+          let row = evt.target.parentNode;
+          let corpus = row.children[0].textContent;
+          set_corpus(corpus).then(() => {
+            console.log("Set corpus. Refreshing");
+            refresh_corpora();
+          });
+        }
+      },
+      true
+    );
+    const titleCase = (s) =>
+      s.replace(/^_*(.)|_+(.)/g, (s, c, d) =>
+        c ? c.toUpperCase() : " " + d.toUpperCase()
+      );
+
+    function tableFromJson(data) {
+      const table = document.createElement("table");
+
+      // Extract table headers from first element
+      let headers = Object.keys(data[0]);
+
+      // Create table header
+      let thead = table.createTHead();
+      for (let i = 0; i < headers.length; i++) {
+        let th = document.createElement("th");
+        th.innerHTML = titleCase(headers[i]);
+        thead.appendChild(th);
+      }
+
+      // Create table body
+      let tbody = table.createTBody();
+      for (let i = 0; i < data.length; i++) {
+        let tr = tbody.insertRow(-1);
+
+        for (let j = 0; j < headers.length; j++) {
+          let tabCell = tr.insertCell(-1);
+          let cellValue = data[i][headers[j]];
+          // Replace booleans with spans
+          if (cellValue === true) {
+            cellValue = '<span class="icon icon-true"></span>';
+          } else if (cellValue === false) {
+            cellValue = '<span class="icon icon-false"></span>';
+          }
+          tabCell.innerHTML = cellValue;
+        }
+      }
+
+      // Display table
+      const divShowData = document.getElementById("showData");
+      divShowData.innerHTML = "";
+      divShowData.appendChild(table);
+    }
+
+    async function uploadFile(input) {
+      const file = input.files[0];
+      const formdata = new FormData();
+      formdata.append("file", file);
+
+      const responseElement = document.getElementById("response");
+
+      fetch("/corpus", {
+        method: "PUT",
+        body: formdata,
+      }).then(() => refresh_corpora());
+    }
+  </script>
+</html>
