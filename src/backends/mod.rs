@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use tracing::warn;
 
-pub const DEFAULT_MARKOV_CORPUS: &str = include_str!("../../dorian_gray.txt");
+const DEFAULT_MARKOV_CORPUS: &str = include_str!("../../dorian_gray.txt");
 
 pub trait FileStorage {
     fn list_files(&self) -> Result<Vec<String>>;
@@ -14,7 +14,7 @@ pub trait FileStorage {
 }
 
 pub trait Database {
-    fn load_settings(&self) -> Result<Settings> {
+    fn get_settings(&self) -> Result<Settings> {
         match self.try_get_settings() {
             Some(settings) => Ok(settings),
             None => {
@@ -25,15 +25,18 @@ pub trait Database {
             }
         }
     }
+
     fn try_get_settings(&self) -> Option<Settings>;
+
     fn write_settings(&self, settings: &Settings) -> Result<()>;
+
     fn get_active_corpus_name(&self) -> Result<String> {
-        let settings = self.load_settings()?;
+        let settings = self.get_settings()?;
         Ok(settings.active_corpus.to_string())
     }
 
     fn set_active_corpus_name(&self, name: &str) -> Result<String> {
-        let mut settings = self.load_settings()?;
+        let mut settings = self.get_settings()?;
         settings.active_corpus = name.into();
         self.write_settings(&settings)?;
         Ok(settings.active_corpus.to_string())
@@ -42,7 +45,7 @@ pub trait Database {
 
 pub trait Backend: FileStorage + Database + Send + Sync + 'static {
     fn get_initial_corpus(&self) -> Result<String> {
-        match self.load_settings()?.active_corpus {
+        match self.get_settings()?.active_corpus {
             CorpusType::Default => Ok(DEFAULT_MARKOV_CORPUS.to_string()),
             CorpusType::FromFile { path } => self.get_file_contents(&path),
         }

@@ -45,10 +45,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Setup tracing
     let fmt_layer = if is_deta {
-        // Deta's log overview can't handle ANSI escape codes
-        tracing_subscriber::fmt::layer().with_ansi(false)
-    } else {
         tracing_subscriber::fmt::layer()
+            .without_time()
+            // Deta's log overview can't handle ANSI escape codes
+            .with_ansi(false)
+    } else {
+        tracing_subscriber::fmt::layer().without_time()
     };
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(

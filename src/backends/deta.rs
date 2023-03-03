@@ -34,8 +34,10 @@ impl FileStorage for DetaService {
         debug!("found {} files", filenames.len());
         Ok(filenames)
     }
+
     fn upload_file(&self, name: &str, data: &[u8]) -> Result<String> {
         let drive = self.client.drive(DRIVE_NAME);
+        debug!("uploading {name} to Drive");
         let file: File = serde_json::from_value(drive.put(name, data)?)
             .expect("Response must contain 'name' field");
         Ok(file.name)
@@ -43,6 +45,7 @@ impl FileStorage for DetaService {
 
     fn get_file_contents(&self, name: &str) -> Result<String> {
         let drive = self.client.drive(DRIVE_NAME);
+        debug!("loading contents of {name} from Drive");
         drive.get(name).map_err(anyhow::Error::from)
     }
 }
@@ -51,6 +54,7 @@ impl Database for DetaService {
     fn try_get_settings(&self) -> Option<Settings> {
         let base = self.client.base(BASE_NAME);
 
+        debug!("getting settings from Base");
         let res = base.get("settings").ok()?;
         serde_json::from_value(res).ok()
     }
