@@ -28,8 +28,8 @@ echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
     # Delete existing output file if exists
-    rm -f $OUTPUT_FILE
-    fd . $INPUT_FOLDER -e json -X cat {} | \
+    rm -f "$OUTPUT_FILE"
+    fd . "$INPUT_FOLDER" -e json -X cat {} | \
         # Select messages by author
         jq ".messages[] | select( .sender_name == \"$AUTHOR\") | .content" | \
         # Fix encoding
@@ -39,5 +39,5 @@ then
         # Convert "\n" to newlines
         sed 's/\\n/\'$'\n''/g' | \
         # Remove empty lines
-        sed '/^[[:space:]]*$/d' > $OUTPUT_FILE
+        sed '/^[[:space:]]*$/d' > "$OUTPUT_FILE"
 fi

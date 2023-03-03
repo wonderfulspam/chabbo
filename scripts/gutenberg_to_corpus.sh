@@ -5,6 +5,7 @@
 # for use in Chabbo
 
 DIR="$(dirname "$(realpath "$0")")"
+# shellcheck source=helpers.sh
 source "${DIR}/helpers.sh"
 
 INPUT_URL=$1
@@ -21,7 +22,7 @@ read -p "Are you sure? " -n 1 -r
 echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-    result=$(wget -qO- $INPUT_URL)
+    result=$(wget -qO- "$INPUT_URL")
     echo "$result" | \
     # Remove any text before "*** START OF"
     sd -f ms ".*\*\*\* START OF" '' | \
@@ -38,5 +39,5 @@ then
     # Break into sentences
     sd '[\?\.;] ' "\n" | \
     # Ensure no double newlines
-    sd "\s*\n+" "\n" > $OUTPUT_FILE
+    sd "\s*\n+" "\n" > "$OUTPUT_FILE"
 fi

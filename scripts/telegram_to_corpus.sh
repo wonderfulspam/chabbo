@@ -25,7 +25,7 @@ read -p "Are you sure? " -n 1 -r
 echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-    cat $INPUT_FILE | \
+    cat "$INPUT_FILE" | \
         # Select messages by author
         # Filter by plain text messages
         jq ".messages[] | select( .from == \"$AUTHOR\") | \
@@ -35,5 +35,5 @@ then
         # Convert "\n" to newlines
         sed 's/\\n/\'$'\n''/g' | \
         # Remove empty lines
-        sed '/^[[:space:]]*$/d' > $OUTPUT_FILE
+        sed '/^[[:space:]]*$/d' > "$OUTPUT_FILE"
 fi

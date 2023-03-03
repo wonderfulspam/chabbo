@@ -17,3 +17,7 @@ push: package
 # Run the application
 run:
   cargo run
+
+# Run shellcheck on scripts folder
+shellcheck severity="warning":
+  docker run --rm -v "$PWD:/mnt" koalaman/shellcheck:stable -x -P SCRIPTDIR -S {{ severity }} scripts/*

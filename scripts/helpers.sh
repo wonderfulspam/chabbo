@@ -2,8 +2,8 @@
 
 # Run command, exit if it fails
 function test_or_exit() {
-    local COMMAND="${@:1:$#-1}"
-    local MSG="${@: -1}"
+    local COMMAND="${*:1:$#-1}"
+    local MSG="${*: -1}"
 
     eval "$COMMAND" || { echo "$MSG"; exit 1; }
 }
