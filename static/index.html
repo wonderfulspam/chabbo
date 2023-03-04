@@ -8,6 +8,11 @@
     />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Chabbo</title>
+    <style>
+      #response p:first-letter {
+        text-transform: uppercase;
+      }
+    </style>
   </head>
   <body>
     <main class="container">
@@ -17,8 +22,9 @@
         <input
           type="text"
           id="chabbo-input"
-          placeholder="Your input"
+          placeholder="Enter a word or leave blank"
           autofocus
+          pattern="[^\s]+"
         />
         <div class="grid">
           <button type="submit" id="generate">Generate</button>
@@ -75,5 +81,12 @@
         inputElement.focus();
       });
     });
+
+    // Prevent spaces
+    const inputField = document.getElementById("chabbo-input");
+    inputField.onkeypress = function (e) {
+      var key = e.keyCode;
+      return key !== 32;
+    };
   </script>
 </html>
