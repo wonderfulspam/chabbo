@@ -20,13 +20,27 @@
         background: var(--secondary-hover);
         cursor: pointer;
       }
+      #showData {
+        position: relative;
+      }
+      #spinner-overlay {
+        position: absolute;
+        background-color: var(--background-color);
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        padding-top: 10%;
+        z-index: 100;
+        visibility: hidden;
+      }
     </style>
   </head>
   <body>
     <main class="container">
       <h1>Available corpora</h1>
       <div id="response"></div>
-      <div id="showData"></div>
       <div class="grid">
         <input
           id="corpus-file"
@@ -48,6 +62,7 @@
           Back
         </button>
       </div>
+      <div id="showData"></div>
     </main>
   </body>
 
@@ -82,6 +97,7 @@
         if (evt.target.tagName === "TD") {
           let row = evt.target.parentNode;
           let corpus = row.children[0].textContent;
+          document.getElementById("spinner-overlay").style.visibility = "visible";
           set_corpus(corpus).then(() => {
             console.log("Set corpus. Refreshing");
             refresh_corpora();
@@ -131,6 +147,11 @@
       const divShowData = document.getElementById("showData");
       divShowData.innerHTML = "";
       divShowData.appendChild(table);
+
+      let spinner = document.createElement("div");
+      spinner.id = "spinner-overlay";
+      spinner.setAttribute("aria-busy", true);
+      divShowData.appendChild(spinner);
     }
 
     async function uploadFile(input) {
