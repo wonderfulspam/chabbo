@@ -10,7 +10,7 @@ use chabbo::backends::{deta::DetaService, local::LocalService, Backend};
 use markov::Chain;
 use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, sync::Arc};
-use tokio::sync::Mutex;
+use tokio::sync::RwLock;
 use tower_http::trace::TraceLayer;
 use tracing::{debug, info};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -34,7 +34,7 @@ fn default_port() -> u16 {
 
 #[derive(Clone)]
 struct AppState {
-    chain: Arc<Mutex<Chain<String>>>,
+    chain: Arc<RwLock<Chain<String>>>,
     backend: Arc<Box<dyn Backend>>,
 }
 
@@ -75,7 +75,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create app state
     let state = AppState {
-        chain: Arc::new(Mutex::new(chain)),
+        chain: Arc::new(RwLock::new(chain)),
         backend: Arc::new(backend),
     };
 
@@ -133,13 +133,14 @@ async fn markov_response(
     State(state): State<AppState>,
     Json(payload): Json<MarkovRequest>,
 ) -> Json<MarkovResponse> {
-    let guard = state.chain.lock().await;
-    let generated_string = if payload.input.is_empty() {
-        guard.generate_str()
-    } else {
-        guard.generate_str_from_token(&payload.input.to_lowercase())
+    let generated_string = {
+        let guard = state.chain.read().await;
+        if payload.input.is_empty() {
+            guard.generate_str()
+        } else {
+            guard.generate_str_from_token(&payload.input.to_lowercase())
+        }
     };
-    drop(guard);
 
     let response = if generated_string.is_empty() {
         format!("No string found for {}", &payload.input)
@@ -219,9 +220,10 @@ async fn replace_chain(
     text: &str,
 ) -> Result<String> {
     let chain = chabbo::get_chain_from_text(text);
-    let mut guard = state.chain.lock().await;
-    *guard = chain;
-    drop(guard);
+    {
+        let mut guard = state.chain.write().await;
+        *guard = chain;
+    }
 
     // Set active corpus
     state.backend.set_active_corpus_name(corpus_name)
