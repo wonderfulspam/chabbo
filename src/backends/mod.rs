@@ -1,4 +1,5 @@
 pub mod deta;
+pub mod ephemeral;
 pub mod local;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -59,7 +60,7 @@ where
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone)]
 enum CorpusType {
     Default,
     FromFile { path: String },
@@ -86,7 +87,7 @@ impl From<&str> for CorpusType {
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Settings {
     active_corpus: CorpusType,
 }

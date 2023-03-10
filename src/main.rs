@@ -6,7 +6,9 @@ use axum::{
     routing::{get, post, put},
     Router,
 };
-use chabbo::backends::{deta::DetaService, local::LocalService, Backend};
+use chabbo::backends::{
+    deta::DetaService, ephemeral::EphemeralService, local::LocalService, Backend,
+};
 use markov::Chain;
 use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, sync::Arc};
@@ -26,10 +28,16 @@ struct Config {
     // Thus, we set a default
     #[serde(default = "default_port")]
     port: u16,
+    #[serde(default = "use_ephemeral")]
+    use_ephemeral_backend: bool,
 }
 
 fn default_port() -> u16 {
     3000
+}
+
+fn use_ephemeral() -> bool {
+    false
 }
 
 #[derive(Clone)]
@@ -63,6 +71,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend: Box<dyn Backend> = if let Some(deta_project_key) = config.deta_project_key {
         debug!("creating Deta service");
         Box::new(DetaService::new(deta_project_key))
+    } else if config.use_ephemeral_backend {
+        debug!("using ephemeral in-memory backend");
+        Box::<EphemeralService>::default()
     } else {
         debug!("using local backend");
         Box::<LocalService>::default()

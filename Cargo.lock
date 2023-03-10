@@ -137,6 +137,7 @@ dependencies = [
  "directories",
  "envy",
  "markov",
+ "once_cell",
  "serde",
  "serde_json",
  "tokio",
