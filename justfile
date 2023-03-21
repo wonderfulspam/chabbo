@@ -18,6 +18,10 @@ push: package
 run:
   cargo run
 
+# Run local dev
+dev:
+  spacex dev
+
 # Run shellcheck on scripts folder
 shellcheck severity="warning":
   docker run --rm -v "$PWD:/mnt" koalaman/shellcheck:stable -x -P SCRIPTDIR -S {{ severity }} scripts/*
