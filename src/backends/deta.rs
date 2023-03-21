@@ -73,9 +73,9 @@ impl Database for DetaService {
 }
 
 impl DetaService {
-    pub fn new(deta_project_key: String) -> Self {
+    pub fn new(deta_project_key: &str) -> Self {
         Self {
-            client: Deta::new(&deta_project_key),
+            client: Deta::new(deta_project_key),
         }
     }
 }

@@ -6,9 +6,7 @@ use axum::{
     routing::{get, post, put},
     Router,
 };
-use chabbo::backends::{
-    deta::DetaService, ephemeral::EphemeralService, local::LocalService, Backend,
-};
+use chabbo::backends::Backend;
 use markov::Chain;
 use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, sync::Arc};
@@ -20,26 +18,6 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 const INDEX_HTML: &str = include_str!("../static/index.html");
 const CORPUS_HTML: &str = include_str!("../static/corpus.html");
 
-#[derive(Deserialize)]
-struct Config {
-    // Will not be set in local env
-    deta_project_key: Option<String>,
-    // May not be set in local env but is always needed
-    // Thus, we set a default
-    #[serde(default = "default_port")]
-    port: u16,
-    #[serde(default = "use_ephemeral")]
-    use_ephemeral_backend: bool,
-}
-
-fn default_port() -> u16 {
-    3000
-}
-
-fn use_ephemeral() -> bool {
-    false
-}
-
 #[derive(Clone)]
 struct AppState {
     chain: Arc<RwLock<Chain<String>>>,
@@ -48,7 +26,7 @@ struct AppState {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let Ok(config) = envy::from_env::<Config>() else { return Err("Please provide all necessary envvars".into()) };
+    let config = chabbo::get_config_from_env()?;
     let is_deta = config.deta_project_key.is_some();
 
     // Setup tracing
@@ -68,16 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .init();
 
     // Choose storage backend based on env
-    let backend: Box<dyn Backend> = if let Some(deta_project_key) = config.deta_project_key {
-        debug!("creating Deta service");
-        Box::new(DetaService::new(deta_project_key))
-    } else if config.use_ephemeral_backend {
-        debug!("using ephemeral in-memory backend");
-        Box::<EphemeralService>::default()
-    } else {
-        debug!("using local backend");
-        Box::<LocalService>::default()
-    };
+    let backend: Box<dyn Backend> = chabbo::choose_backend(&config);
     debug!("initialized backend");
 
     // Setup initial markov chain
