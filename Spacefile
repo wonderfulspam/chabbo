@@ -13,7 +13,6 @@ micros:
       # - PATH="$HOME/.cargo/bin:$PATH" cargo build --target x86_64-unknown-linux-gnu --release
     run: ./chabbo
     dev: cargo run
-    path: /
     # Use the pre-built binary
     include:
       - bin/chabbo
