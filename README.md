@@ -59,7 +59,7 @@ Communication with Deta is handled via
 * [x] Be generic over file system & deta backends
 * [x] Allow changing/adding corpora
 * [ ] Allow changing Markov chain order on the fly
-* [ ] Build on Deta instead of shipping binary directly (awaiting upstream fix)
+* [x] Build on Deta instead of shipping binary directly (awaiting upstream fix)
 * [ ] Improve error handling to improve resilience
 * [ ] Replace the trainwreck of a frontend with eg. a Svelte app
 
