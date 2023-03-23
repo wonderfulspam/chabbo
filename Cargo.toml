@@ -7,7 +7,7 @@ edition = "2021"
 anyhow = "1.0.69"
 axum = { version = "0.6.9", features = ["multipart"] }
 # Custom version of deta_rs that swaps out reqwest for ureq
-deta_rs = { git = "https://github.com/wonderfulspam/deta-rust"}
+deta_rs = { git = "https://github.com/wonderfulspam/deta-rust", rev = "0b1b08073f3cd941a1a8281fc3525c26e01794be" }
 directories = "4.0.1"
 envy = "0.4.2"
 markov = "1.1.0"
